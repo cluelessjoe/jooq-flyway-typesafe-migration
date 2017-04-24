@@ -8,10 +8,10 @@ import java.net.URL;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
-public class NextModelGenerator {
+public class LatestModelGenerator {
 
     public static void main(String[] args) throws Exception {
-        new NextModelGenerator().generateNextModel();
+        new LatestModelGenerator().generateNextModel();
 
     }
 
