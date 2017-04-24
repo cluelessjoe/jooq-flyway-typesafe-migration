@@ -18,7 +18,8 @@ public class V1__createAuthorAndBookTables implements JdbcMigration {
 
         create.createSequence("S_AUTHOR_ID").execute();
 
-        create.createTable("AUTHOR")
+        String authorTableName = "AUTHOR";
+        create.createTable(authorTableName)
                 .column("ID", SQLDataType.INTEGER.nullable(false))
                 .column("FIRST_NAME", SQLDataType.VARCHAR.length(50))
                 .column("LAST_NAME", SQLDataType.VARCHAR.length(50).nullable(false))
@@ -27,18 +28,18 @@ public class V1__createAuthorAndBookTables implements JdbcMigration {
                 .column("ADDRESS", SQLDataType.VARCHAR.length(50))
                 .execute();
 
-        create.alterTable("AUTHOR").add(constraint("PK_T_AUTHOR").primaryKey("ID")).execute();
+        create.alterTable(authorTableName).add(constraint("PK_T_AUTHOR").primaryKey("ID")).execute();
 
-
-        create.createTable("BOOK")
+        String bookTableName = "BOOK";
+        create.createTable(bookTableName)
                 .column("ID", SQLDataType.INTEGER.nullable(false))
                 .column("AUTHOR_ID", SQLDataType.INTEGER.nullable(false))
                 .column("TITLE", SQLDataType.VARCHAR.length(400).nullable(false))
                 .execute();
 
-        create.alterTable("BOOK").add(constraint("PK_T_BOOK").primaryKey("ID")).execute();
-        create.alterTable("BOOK").add(
-                constraint("FK_T_BOOK_AUTHOR_ID").foreignKey("AUTHOR_ID").references("AUTHOR", "ID"))
+        create.alterTable(bookTableName).add(constraint("PK_T_BOOK").primaryKey("ID")).execute();
+        create.alterTable(bookTableName).add(
+                constraint("FK_T_BOOK_AUTHOR_ID").foreignKey("AUTHOR_ID").references(authorTableName, "ID"))
                 .execute();
 
     }
