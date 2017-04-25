@@ -16,17 +16,14 @@
         <dependency>
             <groupId>foo.bar.cluelessjoe</groupId>
             <artifactId>app</artifactId>
-            <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>foo.bar.cluelessjoe</groupId>
             <artifactId>migrator</artifactId>
-            <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>foo.bar.cluelessjoe</groupId>
             <artifactId>common</artifactId>
-            <version>${project.version}</version>
         </dependency>
     </dependencies>
 </project>

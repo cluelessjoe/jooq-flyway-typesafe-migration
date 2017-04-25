@@ -16,7 +16,6 @@
         <dependency>
             <groupId>foo.bar.cluelessjoe</groupId>
             <artifactId>common</artifactId>
-            <version>${project.version}</version><!-- FIXME consolidate version in parent -->
         </dependency>
     </dependencies>
 
