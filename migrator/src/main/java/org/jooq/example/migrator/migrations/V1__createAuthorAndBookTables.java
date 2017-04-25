@@ -1,21 +1,17 @@
 package org.jooq.example.migrator.migrations;
 
-import org.flywaydb.core.api.migration.jdbc.JdbcMigration;
 import org.jooq.DSLContext;
-import org.jooq.SQLDialect;
-import org.jooq.impl.DSL;
+import org.jooq.example.migrator.JooqMigration;
 import org.jooq.impl.SQLDataType;
 
 import java.sql.Connection;
 
 import static org.jooq.impl.DSL.constraint;
 
-public class V1__createAuthorAndBookTables implements JdbcMigration {
+public class V1__createAuthorAndBookTables extends JooqMigration {
 
     @Override
-    public void migrate(Connection connection) throws Exception {
-        DSLContext create = DSL.using(connection, SQLDialect.H2);
-
+    public void migrate(Connection connection, DSLContext create) {
         create.createSequence("S_AUTHOR_ID").execute();
 
         String authorTableName = "AUTHOR";
@@ -43,4 +39,5 @@ public class V1__createAuthorAndBookTables implements JdbcMigration {
                 .execute();
 
     }
+
 }

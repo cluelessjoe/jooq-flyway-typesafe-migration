@@ -11,42 +11,59 @@ import java.nio.file.Paths;
 public class LatestModelGenerator {
 
     public static void main(String[] args) throws Exception {
-        new LatestModelGenerator().generateNextModel();
+        new LatestModelGenerator("jdbc:h2:~/h2testDb", "sa", "").generateNextModel();
+    }
 
+    private final String dbUrl;
+    private final String user;
+    private final String password;
+    private final File projectRoot;
+    private final String migratorModuleName;
+    private final String appModuleName;
+    private final String migratorGeneratedSourcesDir;
+    private final String appGeneratedSourcesDir;
+    private final String migratorModelPackage;
+    private final String appModelPackage;
+    private final String generatedSourceDir;
+    private final Path appGeneratedSourcesPackageDir;
+
+    public LatestModelGenerator(String dbUrl, String user, String password) {
+        this.dbUrl = dbUrl;
+        this.user = user;
+        this.password = password;
+        projectRoot = determineProjectRoot();
+        generatedSourceDir = "src/main/generated-sources/";
+        migratorModuleName = "migrator";
+        appModuleName = "app";
+        migratorGeneratedSourcesDir = computeGeneratedSourceDir(migratorModuleName);
+        migratorModelPackage = "org.jooq.example.migrator.model";
+        appGeneratedSourcesDir = computeGeneratedSourceDir(appModuleName);
+        appModelPackage = "org.jooq.example.app.model";
+        appGeneratedSourcesPackageDir = Paths.get(projectRoot.getAbsolutePath(), appModuleName, generatedSourceDir + toDir(appModelPackage));
     }
 
     private void generateNextModel() {
-        String dbUrl = "jdbc:h2:~/h2testDb";
-        String user = "sa";
-        String password = "";
-        File projectRoot = determineProjectRoot();
-
         int currentVersion = new Migrator().migrateAndReturnCurrentVersion(dbUrl, user, password);
 
-        String migratorGeneratedSourcesDir = computeGeneratedSourceFolder(projectRoot, "migrator");
-        Path migratorGeneratedSourcesPackage = computeMigratorGeneratedSourcePackage(migratorGeneratedSourcesDir, currentVersion);
-        deleteRecursivelyIfExisting(migratorGeneratedSourcesPackage.toFile());
+        String migratorGeneratedModelPackage = migratorModelPackage + ".v" + currentVersion;
+        Path migratorGeneratedSourcesPackage = computeMigratorGeneratedSourcePackageDir(migratorGeneratedModelPackage);
 
         System.out.println("Generating migration model for version " + currentVersion + " in " + migratorGeneratedSourcesDir);
-        generate(createConfiguration(dbUrl, user, password, migratorGeneratedSourcesDir, "org.jooq.example.migrator.model.v" + currentVersion));
+        deleteRecursivelyIfExisting(migratorGeneratedSourcesPackage);
+        generate(createConfiguration(migratorGeneratedSourcesDir, migratorGeneratedModelPackage));
 
-        String businessModule = "app";
-        String appGeneratedSourcesDir = computeGeneratedSourceFolder(projectRoot, businessModule);
-        Path appGeneratedSourcesPackage = Paths.get(projectRoot.getAbsolutePath(), businessModule, "src/main/generated-sources/org/jooq/example/app/model");
-        System.out.println("Deleting and generating " + businessModule + " module model for version " + currentVersion + " in " + appGeneratedSourcesDir);
-        deleteRecursivelyIfExisting(appGeneratedSourcesPackage.toFile());
-        generate(createConfiguration(dbUrl, user, password, appGeneratedSourcesDir, "org.jooq.example.app.model"));
+        System.out.println("Generating " + appModuleName + " module model for version " + currentVersion + " in " + appGeneratedSourcesDir);
+        deleteRecursivelyIfExisting(appGeneratedSourcesPackageDir);
+        generate(createConfiguration(appGeneratedSourcesDir, appModelPackage));
     }
 
-    private Path computeMigratorGeneratedSourcePackage(String migratorGeneratedSourcesDir, int currentVersion) {
+    private Path computeMigratorGeneratedSourcePackageDir(String migratorGeneratedModelPackage) {
         return Paths.get(
                 migratorGeneratedSourcesDir,
-                Migrator.class.getPackage().getName().replace(".", "/"),
-                "/model",
-                "/v" + currentVersion);
+                toDir(migratorGeneratedModelPackage));
     }
 
-    private Configuration createConfiguration(String dbUrl, String user, String password, String generatedSourcesFolder, String generatedPackageName) {
+    private Configuration createConfiguration(String generatedSourcesDir, String generatedPackageName) {
         return new Configuration()
                 .withJdbc(new Jdbc()
                         .withDriver("org.h2.Driver")
@@ -62,11 +79,11 @@ public class LatestModelGenerator {
                                 .withSchemaVersionProvider("SELECT :schema_name || '_' || MAX(\"version\") FROM \"" + Migrator.FLYWAY_TEST + "\".\"schema_version\""))
                         .withTarget(new Target()
                                 .withPackageName(generatedPackageName)
-                                .withDirectory(generatedSourcesFolder)));
+                                .withDirectory(generatedSourcesDir)));
     }
 
-    private String computeGeneratedSourceFolder(File projectRoot, String module) {
-        return new File(projectRoot, module + "/src/main/generated-sources/").getAbsolutePath();
+    private String computeGeneratedSourceDir(String module) {
+        return new File(projectRoot, module + "/" + generatedSourceDir).getAbsolutePath();
     }
 
     private void generate(Configuration configuration) {
@@ -78,12 +95,12 @@ public class LatestModelGenerator {
     }
 
     private File determineProjectRoot() {
-        File generatedClassFolder = fileFromUrl(Migrator.class.getClassLoader().getResource(""));
-        String generatedClassFolderPath = generatedClassFolder.getAbsolutePath();
-        if (!generatedClassFolderPath.endsWith("classes")) {
-            throw new IllegalStateException("Expected the generated folder, got " + generatedClassFolderPath);
+        File generatedClassDir = fileFromUrl(Migrator.class.getClassLoader().getResource(""));
+        String generatedClassDirPath = generatedClassDir.getAbsolutePath();
+        if (!generatedClassDirPath.endsWith("classes")) {
+            throw new IllegalStateException("Expected a generated classes directory, got " + generatedClassDirPath);
         }
-        return generatedClassFolder.getParentFile().getParentFile().getParentFile();
+        return generatedClassDir.getParentFile().getParentFile().getParentFile();
     }
 
     private File fileFromUrl(URL url) {
@@ -94,7 +111,8 @@ public class LatestModelGenerator {
         }
     }
 
-    private void deleteRecursivelyIfExisting(File f) {
+    private void deleteRecursivelyIfExisting(Path p) {
+        File f = p.toFile();
         if (f.exists()) {
             System.out.println("Deleting recursively content in " + f.getAbsolutePath());
             deleteRecursively(f);
@@ -109,4 +127,9 @@ public class LatestModelGenerator {
         if (!f.delete())
             throw new RuntimeException("Failed to delete file: " + f);
     }
+
+    private String toDir(String packageName) {
+        return packageName.replace(".", "/");
+    }
+
 }
