@@ -51,3 +51,4 @@ One should notably :
   * for example for null checking
 * make sure LatestModelGenerator.determineProjectRoot works for you
 * improve logging
+* unit test the whole
