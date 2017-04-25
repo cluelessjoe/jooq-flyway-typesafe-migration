@@ -7,10 +7,21 @@
     <parent>
         <groupId>foo.bar.cluelessjoe</groupId>
         <artifactId>jooq-flyway-typesafe-migration</artifactId>
-        <version>dev-SNAPSHOT</version>
+        <version>1.0-SNAPSHOT</version>
     </parent>
 
-    <groupId>foo.bar.cluelessjoe</groupId>
     <artifactId>runner</artifactId>
 
+    <dependencies>
+        <dependency>
+            <groupId>foo.bar.cluelessjoe</groupId>
+            <artifactId>app</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>foo.bar.cluelessjoe</groupId>
+            <artifactId>migrator</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+    </dependencies>
 </project>

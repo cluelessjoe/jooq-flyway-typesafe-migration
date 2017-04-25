@@ -7,11 +7,11 @@
     <parent>
         <groupId>foo.bar.cluelessjoe</groupId>
         <artifactId>jooq-flyway-typesafe-migration</artifactId>
-        <version>dev-SNAPSHOT</version>
+        <version>1.0-SNAPSHOT</version>
     </parent>
 
-    <groupId>foo.bar.cluelessjoe</groupId>
-    <artifactId>migration</artifactId>
+    <artifactId>migrator</artifactId>
+
     <build>
         <plugins>
             <plugin>
@@ -33,4 +33,5 @@
             </plugin>
         </plugins>
     </build>
+
 </project>

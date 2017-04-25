@@ -1,22 +1,24 @@
+import org.jooq.example.migrator.DbInfo;
 import org.jooq.example.migrator.Migrator;
 import org.jooq.util.GenerationTool;
 import org.jooq.util.jaxb.*;
 
 import java.io.File;
+import java.io.IOException;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
 public class LatestModelGenerator {
 
+    private final DbInfo dbInfo;
+
     public static void main(String[] args) throws Exception {
-        new LatestModelGenerator("jdbc:h2:~/h2testDb", "sa", "").generateNextModel();
+        new LatestModelGenerator(new DbInfo("jdbc:h2:~/h2testDb", "sa", "")).generateNextModel();
     }
 
-    private final String dbUrl;
-    private final String user;
-    private final String password;
     private final File projectRoot;
     private final String migratorModuleName;
     private final String appModuleName;
@@ -27,10 +29,8 @@ public class LatestModelGenerator {
     private final String generatedSourceDir;
     private final Path appGeneratedSourcesPackageDir;
 
-    public LatestModelGenerator(String dbUrl, String user, String password) {
-        this.dbUrl = dbUrl;
-        this.user = user;
-        this.password = password;
+    public LatestModelGenerator(DbInfo dbInfo) {
+        this.dbInfo = dbInfo;
         projectRoot = determineProjectRoot();
         generatedSourceDir = "src/main/generated-sources/";
         migratorModuleName = "migrator";
@@ -43,7 +43,7 @@ public class LatestModelGenerator {
     }
 
     private void generateNextModel() {
-        int currentVersion = new Migrator().migrateAndReturnCurrentVersion(dbUrl, user, password);
+        int currentVersion = new Migrator(dbInfo).migrateAndReturnCurrentVersion();
 
         String migratorGeneratedModelPackage = migratorModelPackage + ".v" + currentVersion;
         Path migratorGeneratedSourcesPackage = computeMigratorGeneratedSourcePackageDir(migratorGeneratedModelPackage);
@@ -67,9 +67,9 @@ public class LatestModelGenerator {
         return new Configuration()
                 .withJdbc(new Jdbc()
                         .withDriver("org.h2.Driver")
-                        .withUrl(dbUrl)
-                        .withUser(user)
-                        .withPassword(password))
+                        .withUrl(dbInfo.getDbUrl())
+                        .withUser(dbInfo.getUser())
+                        .withPassword(dbInfo.getPassword()))
                 .withGenerator(new Generator()
                         .withDatabase(new Database()
                                 .withName("org.jooq.util.h2.H2Database")
@@ -112,20 +112,21 @@ public class LatestModelGenerator {
     }
 
     private void deleteRecursivelyIfExisting(Path p) {
-        File f = p.toFile();
-        if (f.exists()) {
-            System.out.println("Deleting recursively content in " + f.getAbsolutePath());
-            deleteRecursively(f);
+        if (Files.exists(p)) {
+            System.out.println("Deleting recursively content in " + p.normalize().toFile().getAbsolutePath());
+            deleteRecursively(p);
         }
     }
 
-    private void deleteRecursively(File f) {
-        if (f.isDirectory()) {
-            for (File c : f.listFiles())
-                deleteRecursively(c);
+    private void deleteRecursively(Path p) {
+        if (Files.isDirectory(p)) {
+            try {
+                Files.list(p).forEach(this::deleteRecursively);
+                Files.delete(p);
+            } catch (IOException e) {
+                throw new RuntimeException("When trying to delete " + p, e);
+            }
         }
-        if (!f.delete())
-            throw new RuntimeException("Failed to delete file: " + f);
     }
 
     private String toDir(String packageName) {
