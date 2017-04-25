@@ -34,4 +34,11 @@
         </plugins>
     </build>
 
+    <dependencies>
+        <dependency>
+            <groupId>foo.bar.cluelessjoe</groupId>
+            <artifactId>common</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+    </dependencies>
 </project>

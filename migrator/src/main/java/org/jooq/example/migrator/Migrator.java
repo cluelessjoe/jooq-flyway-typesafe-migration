@@ -1,6 +1,7 @@
 package org.jooq.example.migrator;
 
 import org.flywaydb.core.Flyway;
+import org.jooq.example.common.DbInfo;
 
 public class Migrator {
 

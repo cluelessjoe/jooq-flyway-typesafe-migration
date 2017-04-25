@@ -75,6 +75,7 @@
     </dependencies>
 
     <modules>
+        <module>common</module>
         <module>migrator</module>
         <module>app</module>
         <module>runner</module>

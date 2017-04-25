@@ -1,9 +1,10 @@
 # jooq-flyway-typesafe-migration
+
 Doing DB migration in a typesafe, history preserving way, with jOOQ and Flyway.
 
 ## Presentation
 
-3 modules are at play:
+3 main modules are at play:
 * the migrator module contains all the migrations scripts and versioned models,
 * the app module contains the business logic and a non versioned model,
 * the runner, used at application starting, launching first the migrations then the app.
@@ -39,10 +40,6 @@ For example, if we are at migration 20 and model version 20, adding a new table 
 * generating the new model, with version 21,
 * a migration script inserting data in the table, with version 22, based on model version 21.
 
-## Work in progress
-
-The runner isn't coded yet.
- 
 ## Just a Proof Of Concept
 
 The current code isn't really production ready. 

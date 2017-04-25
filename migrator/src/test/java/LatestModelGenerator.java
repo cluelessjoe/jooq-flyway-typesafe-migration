@@ -1,4 +1,4 @@
-import org.jooq.example.migrator.DbInfo;
+import org.jooq.example.common.DbInfo;
 import org.jooq.example.migrator.Migrator;
 import org.jooq.util.GenerationTool;
 import org.jooq.util.jaxb.*;

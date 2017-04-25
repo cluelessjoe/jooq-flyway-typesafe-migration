@@ -1,4 +1,4 @@
-package org.jooq.example.migrator;
+package org.jooq.example.common;
 
 public class DbInfo {
     private final String dbUrl;

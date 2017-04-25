@@ -1,6 +1,7 @@
 package org.jooq.example.runner;
 
-import org.jooq.example.migrator.DbInfo;
+import org.jooq.example.app.BookLookup;
+import org.jooq.example.common.DbInfo;
 import org.jooq.example.migrator.Migrator;
 
 public class Runner {
@@ -17,6 +18,8 @@ public class Runner {
 
     public void start() {
         new Migrator(dbInfo).migrateAndReturnCurrentVersion();
-        //FIXME : run something
+        int nbOfResults = 10;
+        System.out.println("The first " + nbOfResults + " titles are:");
+        new BookLookup(dbInfo).getBooksNames(0, nbOfResults).forEach(System.out::println);
     }
 }
