@@ -43,4 +43,14 @@ For example, if we are at migration 20 and model version 20, adding a new table 
 
 The runner isn't coded yet.
  
+## Just a Proof Of Concept
 
+The current code isn't really production ready. 
+
+One should notably :
+* be cautious with JooqMigration, which relies on JDBCUtils.dialect which may fail depending on the way the connection is established,
+  * JNDI is most likely a no go
+* add assertions at various locations
+  * for example for null checking
+* make sure LatestModelGenerator.determineProjectRoot works for you
+* improve logging
