@@ -18,7 +18,7 @@ public abstract class JooqMigration implements JdbcMigration {
 
     private SQLDialect extraDialectOrThrow(Connection connection) {
         SQLDialect dialect = JDBCUtils.dialect(connection);
-        if(SQLDialect.DEFAULT.equals(dialect))
+        if (SQLDialect.DEFAULT.equals(dialect))
             throw new IllegalStateException("Dialect couldn't be deducted from connection " + connection);
         return dialect;
     }

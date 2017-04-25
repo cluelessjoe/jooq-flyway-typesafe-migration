@@ -14,11 +14,6 @@ import java.nio.file.Paths;
 public class LatestModelGenerator {
 
     private final DbInfo dbInfo;
-
-    public static void main(String[] args) throws Exception {
-        new LatestModelGenerator(new DbInfo("jdbc:h2:~/h2testDb", "sa", "")).generateNextModel();
-    }
-
     private final File projectRoot;
     private final String migratorModuleName;
     private final String appModuleName;
@@ -28,7 +23,6 @@ public class LatestModelGenerator {
     private final String appModelPackage;
     private final String generatedSourceDir;
     private final Path appGeneratedSourcesPackageDir;
-
     public LatestModelGenerator(DbInfo dbInfo) {
         this.dbInfo = dbInfo;
         projectRoot = determineProjectRoot();
@@ -40,6 +34,10 @@ public class LatestModelGenerator {
         appGeneratedSourcesDir = computeGeneratedSourceDir(appModuleName);
         appModelPackage = "org.jooq.example.app.model";
         appGeneratedSourcesPackageDir = Paths.get(projectRoot.getAbsolutePath(), appModuleName, generatedSourceDir + toDir(appModelPackage));
+    }
+
+    public static void main(String[] args) throws Exception {
+        new LatestModelGenerator(new DbInfo("jdbc:h2:~/h2testDb", "sa", "")).generateNextModel();
     }
 
     private void generateNextModel() {

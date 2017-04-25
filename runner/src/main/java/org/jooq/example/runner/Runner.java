@@ -7,12 +7,12 @@ public class Runner {
 
     private final DbInfo dbInfo;
 
-    public static void main(String[] args) {
-        new Runner(new DbInfo("jdbc:h2:~/h2testDb", "sa", "")).start();
-    }
-
     public Runner(DbInfo dbInfo) {
         this.dbInfo = dbInfo;
+    }
+
+    public static void main(String[] args) {
+        new Runner(new DbInfo("jdbc:h2:~/h2testDb", "sa", "")).start();
     }
 
     public void start() {
