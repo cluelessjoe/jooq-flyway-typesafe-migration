@@ -52,4 +52,4 @@ Things to improve:
   * ideally even check that only one model is used (or even that the right model is ^^)
 * have a better way of handling the dialect in JooqMigration
 * improve logging
-* run LatestModelGenerator automatically (issue #3)
+* run LatestModelGenerator automatically [issue #3](https://github.com/cluelessjoe/jooq-flyway-typesafe-migration/issues/3)
