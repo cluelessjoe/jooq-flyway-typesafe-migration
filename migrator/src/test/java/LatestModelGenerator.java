@@ -23,6 +23,7 @@ public class LatestModelGenerator {
     private final String appModelPackage;
     private final String generatedSourceDir;
     private final Path appGeneratedSourcesPackageDir;
+
     public LatestModelGenerator(DbInfo dbInfo) {
         this.dbInfo = dbInfo;
         projectRoot = determineProjectRoot();
