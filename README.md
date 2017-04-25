@@ -1,6 +1,6 @@
 # jooq-flyway-typesafe-migration
 
-Doing DB migration in a typesafe, history preserving way, with jOOQ and Flyway.
+Doing DB migration in a type safe, history preserving way, with jOOQ and Flyway.
 
 ## Presentation
 
@@ -16,7 +16,7 @@ For each migration which changes the database structure:
 * the model in the app module is recreated.
 
 As such:
-* each new migration is typesafe since it uses the latest versioned model,
+* each new migration is type safe since it uses the latest versioned model,
 * migrations history is preserved: the previous database models are present, handy when something doesn't go as planned,
 * the business logic doesn't have the versioned models in its classpath, avoiding wrong usage,
 * the business logic relies only and always on the up to date model.
@@ -47,7 +47,7 @@ The current code isn't really production ready.
 Things to improve:
 * add some testing
 * add assertions at various locations
-* add some prefix to each class generated in the migrator versionned models 
+* add some prefix to each class generated in the migrator versioned models 
   * to make it clearer which version is using a migration
   * ideally even check that only one model is used (or even that the right model is ^^)
 * have a better way of handling the dialect in JooqMigration
