@@ -28,8 +28,8 @@ To add a new migration script:
 * add a new Java class extending JooqMigration with an incremented version number in the migrations folder,
 * base your migration on the model of highest version, 
 * if the database structure changes, call ```LatestModelGenerator.main()``` once the migration script is done. This will:
-** drop (if present) and create the latest model in the migrator module, prefixed by its migration number,
-** drop (if present) and create the model in the app module, ensure the business code compiles against the latest model.
+  * drop (if present) and create the latest model in the migrator module, prefixed by its migration number,
+  * drop (if present) and create the model in the app module, ensure the business code compiles against the latest model.
 
 As seen above, one migration script may have up to one model but not necessarily. 
 Indeed, if the database structure changes in a migration, one needs to regenerate the model before being able to use it in a typesafe way, and thus create a migration script only for using the new model.
