@@ -43,7 +43,7 @@ public class LatestModelGenerator {
     }
 
     private void generateNextModel() {
-        int currentVersion = new Migrator(dbInfo).migrateAndReturnCurrentVersion();
+        String currentVersion = new Migrator(dbInfo).migrateAndReturnCurrentVersion();
 
         String migratorGeneratedModelPackage = migratorModelPackage + ".v" + currentVersion;
         Path migratorGeneratedSourcesPackage = computeMigratorGeneratedSourcePackageDir(migratorGeneratedModelPackage);
@@ -119,13 +119,13 @@ public class LatestModelGenerator {
     }
 
     private void deleteRecursively(Path p) {
-        if (Files.isDirectory(p)) {
-            try {
+        try {
+            if (Files.isDirectory(p)) {
                 Files.list(p).forEach(this::deleteRecursively);
-                Files.delete(p);
-            } catch (IOException e) {
-                throw new RuntimeException("When trying to delete " + p, e);
             }
+            Files.delete(p);
+        } catch (IOException e) {
+            throw new RuntimeException("When trying to delete " + p, e);
         }
     }
 

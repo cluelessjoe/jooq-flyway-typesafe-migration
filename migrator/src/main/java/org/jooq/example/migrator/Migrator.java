@@ -11,12 +11,12 @@ public class Migrator {
         this.dbInfo = dbInfo;
     }
 
-    public int migrateAndReturnCurrentVersion() {
+    public String migrateAndReturnCurrentVersion() {
         Flyway flyway = new Flyway();
         flyway.setDataSource(dbInfo.getDbUrl(), dbInfo.getUser(), dbInfo.getPassword());
         flyway.setSchemas(FLYWAY_TEST);
         flyway.setLocations(Migrator.class.getPackage().getName() + "/migrations");
         flyway.migrate();
-        return Integer.parseInt(flyway.info().current().getVersion().getVersion());//FIXME : return string
+        return flyway.info().current().getVersion().getVersion();
     }
 }
