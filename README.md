@@ -44,11 +44,12 @@ For example, if we are at migration 20 and model version 20, adding a new table 
 
 The current code isn't really production ready. 
 
-One should notably :
-* be cautious with JooqMigration, which relies on JDBCUtils.dialect which may fail depending on the way the connection is established,
-  * JNDI is most likely a no go
+Things to improve:
+* add some testing
 * add assertions at various locations
-  * for example for null checking
-* make sure LatestModelGenerator.determineProjectRoot works for you
+* add some prefix to each class generated in the migrator versionned models 
+  * to make it clearer which version is using a migration
+  * ideally even check that only one model is used (or even that the right model is ^^)
+* have a better way of handling the dialect in JooqMigration
 * improve logging
-* unit test the whole
+* run LatestModelGenerator automatically (issue #3)
