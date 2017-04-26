@@ -1,6 +1,6 @@
 # jooq-flyway-typesafe-migration
 
-Doing DB migration in a type safe, history preserving way, with jOOQ and Flyway.
+Doing DB migration in a type safe, history preserving way, with [jOOQ](https://www.jooq.org/) and [Flyway](https://flywaydb.org/).
 
 ## Presentation
 
@@ -49,7 +49,20 @@ Things to improve:
 * add assertions at various locations
 * add some prefix to each class generated in the migrator versioned models 
   * to make it clearer which version is using a migration
+    * I actually don't know if doable with jOOQ
   * ideally even check that only one model is used (or even that the right model is ^^)
+    * it's clearly some day dreaming ^
 * have a better way of handling the dialect in JooqMigration
 * improve logging
 * run LatestModelGenerator automatically [issue #3](https://github.com/cluelessjoe/jooq-flyway-typesafe-migration/issues/3)
+* make sure of possibility to cleanup migrations 
+  * over time there may be a lot of migrations
+  * ideally I would like to be able to compact them or at least delete the oldest
+
+## Thanks !
+
+Thanks [jOOQ](https://www.jooq.org/) and [Flyway](https://flywaydb.org/) for being open source!
+
+## Contributors
+
+[Lukas Eder](https://twitter.com/lukaseder) and [Joseph Pachod](https://twitter.com/joeclueless)
