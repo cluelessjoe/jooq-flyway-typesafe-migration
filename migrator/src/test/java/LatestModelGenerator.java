@@ -10,6 +10,7 @@ import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Optional;
 
 public class LatestModelGenerator {
 
@@ -49,7 +50,7 @@ public class LatestModelGenerator {
 
         System.out.println("Generating migration model for version " + currentVersion + " in " + migratorGeneratedSourcesDir);
         deleteRecursivelyIfExisting(migratorGeneratedSourcesPackage);
-        generate(createConfiguration(migratorGeneratedSourcesDir, migratorGeneratedModelPackage));
+        generate(createConfiguration(migratorGeneratedSourcesDir, migratorGeneratedModelPackage, currentVersion));
 
         System.out.println("Generating " + appModuleName + " module model for version " + currentVersion + " in " + appGeneratedSourcesDir);
         deleteRecursivelyIfExisting(appGeneratedSourcesPackageDir);
@@ -62,14 +63,37 @@ public class LatestModelGenerator {
                 toDir(migratorGeneratedModelPackage));
     }
 
-    private Configuration createConfiguration(String generatedSourcesDir, String generatedPackageName) {
-        return new Configuration()
+    private Configuration createConfiguration(String generatedSourcesDir, String generatedPackageName, String currentVersion) {
+        MatchersTableType matchersTableType = new MatchersTableType();
+        MatcherRule versionPrefixer = new MatcherRule().withExpression("v" + currentVersion + "_$1");
+        matchersTableType
+                .withExpression("^(.*)$")
+                .withTableClass(versionPrefixer)
+                .withTableIdentifier(versionPrefixer)
+                .withRecordClass(versionPrefixer)
+                .withPojoClass(versionPrefixer)
+
+                .withDaoClass(versionPrefixer)
+                .withInterfaceClass(versionPrefixer)
+        ;
+        return createConfiguration(generatedSourcesDir, generatedPackageName, Optional.of(matchersTableType));
+    }
+
+    private Configuration createConfiguration(String generatedSourcesDir, String generatedPackageName, Optional<MatchersTableType> matchers) {
+        Generator generator = new Generator();
+/*        matchers.ifPresent(m -> generator.withStrategy(
+                new Strategy().withMatchers(
+                        new Matchers().withTables(m)
+                )));
+*/
+        generator.withStrategy(new Strategy().withName("PrefixingGeneratorStrategy"));
+        Configuration configuration = new Configuration()
                 .withJdbc(new Jdbc()
                         .withDriver("org.h2.Driver")
                         .withUrl(dbInfo.getDbUrl())
                         .withUser(dbInfo.getUser())
                         .withPassword(dbInfo.getPassword()))
-                .withGenerator(new Generator()
+                .withGenerator(generator
                         .withDatabase(new Database()
                                 .withName("org.jooq.util.h2.H2Database")
                                 .withIncludes(".*")
@@ -79,6 +103,11 @@ public class LatestModelGenerator {
                         .withTarget(new Target()
                                 .withPackageName(generatedPackageName)
                                 .withDirectory(generatedSourcesDir)));
+        return configuration;
+    }
+
+    private Configuration createConfiguration(String generatedSourcesDir, String generatedPackageName) {
+        return createConfiguration(generatedSourcesDir, generatedPackageName, Optional.empty());
     }
 
     private String computeGeneratedSourceDir(String module) {
