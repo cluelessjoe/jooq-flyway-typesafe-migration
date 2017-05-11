@@ -14,6 +14,7 @@ import java.util.Optional;
 
 public class LatestModelGenerator {
 
+    public static final String VERSION_PROPERTY_KEY = "VERSION";
     private final DbInfo dbInfo;
     private final File projectRoot;
     private final String migratorModuleName;
@@ -50,7 +51,7 @@ public class LatestModelGenerator {
 
         System.out.println("Generating migration model for version " + currentVersion + " in " + migratorGeneratedSourcesDir);
         deleteRecursivelyIfExisting(migratorGeneratedSourcesPackage);
-        generate(createConfiguration(migratorGeneratedSourcesDir, migratorGeneratedModelPackage, currentVersion));
+        generate(createConfiguration(migratorGeneratedSourcesDir, migratorGeneratedModelPackage, Optional.of(currentVersion)));
 
         System.out.println("Generating " + appModuleName + " module model for version " + currentVersion + " in " + appGeneratedSourcesDir);
         deleteRecursivelyIfExisting(appGeneratedSourcesPackageDir);
@@ -63,30 +64,17 @@ public class LatestModelGenerator {
                 toDir(migratorGeneratedModelPackage));
     }
 
-    private Configuration createConfiguration(String generatedSourcesDir, String generatedPackageName, String currentVersion) {
-        MatchersTableType matchersTableType = new MatchersTableType();
-        MatcherRule versionPrefixer = new MatcherRule().withExpression("v" + currentVersion + "_$1");
-        matchersTableType
-                .withExpression("^(.*)$")
-                .withTableClass(versionPrefixer)
-                .withTableIdentifier(versionPrefixer)
-                .withRecordClass(versionPrefixer)
-                .withPojoClass(versionPrefixer)
-
-                .withDaoClass(versionPrefixer)
-                .withInterfaceClass(versionPrefixer)
-        ;
-        return createConfiguration(generatedSourcesDir, generatedPackageName, Optional.of(matchersTableType));
-    }
-
-    private Configuration createConfiguration(String generatedSourcesDir, String generatedPackageName, Optional<MatchersTableType> matchers) {
+    private Configuration createConfiguration(String generatedSourcesDir, String generatedPackageName, Optional<String> currentVersion) {
         Generator generator = new Generator();
-/*        matchers.ifPresent(m -> generator.withStrategy(
-                new Strategy().withMatchers(
-                        new Matchers().withTables(m)
-                )));
-*/
         generator.withStrategy(new Strategy().withName("PrefixingGeneratorStrategy"));
+        Database database = new Database()
+                .withName("org.jooq.util.h2.H2Database")
+                .withIncludes(".*")
+                .withExcludes("")
+                .withInputSchema(Migrator.FLYWAY_TEST)
+                .withSchemaVersionProvider("SELECT :schema_name || '_' || MAX(\"version\") FROM \"" + Migrator.FLYWAY_TEST + "\".\"schema_version\"");
+        currentVersion.ifPresent(version -> database.withProperties(new Property().withKey(VERSION_PROPERTY_KEY).withValue("v" + version)));
+
         Configuration configuration = new Configuration()
                 .withJdbc(new Jdbc()
                         .withDriver("org.h2.Driver")
@@ -94,12 +82,7 @@ public class LatestModelGenerator {
                         .withUser(dbInfo.getUser())
                         .withPassword(dbInfo.getPassword()))
                 .withGenerator(generator
-                        .withDatabase(new Database()
-                                .withName("org.jooq.util.h2.H2Database")
-                                .withIncludes(".*")
-                                .withExcludes("")
-                                .withInputSchema(Migrator.FLYWAY_TEST)
-                                .withSchemaVersionProvider("SELECT :schema_name || '_' || MAX(\"version\") FROM \"" + Migrator.FLYWAY_TEST + "\".\"schema_version\""))
+                        .withDatabase(database)
                         .withTarget(new Target()
                                 .withPackageName(generatedPackageName)
                                 .withDirectory(generatedSourcesDir)));

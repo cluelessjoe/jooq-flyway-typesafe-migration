@@ -1,19 +1,21 @@
+import org.jooq.util.AbstractDatabase;
 import org.jooq.util.DefaultGeneratorStrategy;
 import org.jooq.util.Definition;
 
 public class PrefixingGeneratorStrategy extends DefaultGeneratorStrategy {
 
-    public PrefixingGeneratorStrategy() {
-    }
-
     @Override
     public String getJavaClassName(final Definition definition, final Mode mode) {
-        return "v3_" + super.getJavaClassName(definition, mode);
+        return getVersion(definition) + "_" + super.getJavaClassName(definition, mode);
     }
 
     @Override
     public String getJavaIdentifier(Definition definition) {
-        return "v3_" + super.getJavaIdentifier(definition);
+        return getVersion(definition) + "_" + super.getJavaIdentifier(definition);
+    }
+
+    private String getVersion(Definition definition) {
+        return ((AbstractDatabase) definition.getDatabase()).getProperties().getProperty(LatestModelGenerator.VERSION_PROPERTY_KEY);
     }
 
 }
