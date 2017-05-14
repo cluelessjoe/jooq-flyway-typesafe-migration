@@ -14,7 +14,7 @@ public class V3__increase extends JooqMigration {
     public void migrate(Connection connection, DSLContext create) {
 
       create.alterTable(v1_AUTHOR)
-                .alterColumn(v1_AUTHOR.FIRST_NAME)
+                .alterColumn(v1_AUTHOR.v1_FIRST_NAME)
                 .set(SQLDataType.VARCHAR.length(100))
                 .execute();
 

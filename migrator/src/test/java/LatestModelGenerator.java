@@ -66,7 +66,7 @@ public class LatestModelGenerator {
 
     private Configuration createConfiguration(String generatedSourcesDir, String generatedPackageName, Optional<String> currentVersion) {
         Generator generator = new Generator();
-        generator.withStrategy(new Strategy().withName("PrefixingGeneratorStrategy"));
+        currentVersion.ifPresent(v -> generator.withStrategy(new Strategy().withName("PrefixingGeneratorStrategy")));
         Database database = new Database()
                 .withName("org.jooq.util.h2.H2Database")
                 .withIncludes(".*")
