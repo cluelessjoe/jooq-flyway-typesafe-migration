@@ -2,12 +2,17 @@
 
 Proof of concept of DB migrations in a type safe, history preserving way using [jOOQ](https://www.jooq.org/) and [Flyway](https://flywaydb.org/).
 
-## Presentation
+## Concepts
+
+On each jOOQ based migration, if the database structure changes, a matching versioned model is created. Then the next jOOQ based migration can use this model to be type safe. 
+When all the migrations are over, a non versioned model is created for the business code.
+
+## Architecture
 
 3 main modules are at play:
 * the migrator module contains all the migrations scripts and versioned models,
 * the app module contains the business logic and a non versioned model,
-* the runner, used at application starting, launching first the migrations then the app.
+* the runner, used when the application starts, launches first the migrations then the app.
 
 There's no dependency between the migration and app modules.
 
@@ -29,28 +34,12 @@ The migrations are defined in Java through jOOQ, in the migrator module main sou
 
 To add a new migration script:
 * add a new Java class extending JooqMigration with an incremented version number in the migrations folder,
+  * you can't change the model and use the new one in the same migration: you need 2 migrations for this use case.
 * base your migration on the model of highest version, 
-* if the database structure changes, call ```ModelGenerator.main()``` once the migration script is done. This will:
-  * drop (if present) and create the latest model in the migrator module, prefixed by its migration number,
-  * drop (if present) and create the model in the app module, ensure the business code compiles against the latest model.
-
-As seen above, one migration script may have up to one model but not necessarily. 
-Indeed, if the database structure changes in a migration, one needs to regenerate the model before being able to use it in a typesafe way, and thus create a migration script only for using the new model.
-  
-For example, if we are at migration 20 and model version 20, adding a new table and inserting data in it implies:
-* a migration script creating the table, with version 21 and based on model version 20,
-* generating the new model, with version 21,
-* a migration script inserting data in the table, with version 22, based on model version 21.
 
 ## Just a Proof Of Concept
 
 The current code isn't really production ready. 
-
-Things to be done soon:
-* add some prefix to each class generated in the migrator versioned models 
-  * to make it clearer which version is using a migration
-  * [issue #4](https://github.com/cluelessjoe/jooq-flyway-typesafe-migration/issues/4)
-* run ModelGenerator automatically [issue #3](https://github.com/cluelessjoe/jooq-flyway-typesafe-migration/issues/3)
 
 Things to improve:
 * add some testing
@@ -64,7 +53,7 @@ Things to improve:
 
 ## Thanks !
 
-Thanks [jOOQ](https://www.jooq.org/) and [Flyway](https://flywaydb.org/) for being open source!
+Thanks [jOOQ](https://www.jooq.org/) and [Flyway](https://flywaydb.org/) for existing and being open source!
 
 ## Contributors
 
