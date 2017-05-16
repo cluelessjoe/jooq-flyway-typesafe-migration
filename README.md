@@ -30,7 +30,7 @@ The migrations are defined in Java through jOOQ, in the migrator module main sou
 To add a new migration script:
 * add a new Java class extending JooqMigration with an incremented version number in the migrations folder,
 * base your migration on the model of highest version, 
-* if the database structure changes, call ```LatestModelGenerator.main()``` once the migration script is done. This will:
+* if the database structure changes, call ```ModelGenerator.main()``` once the migration script is done. This will:
   * drop (if present) and create the latest model in the migrator module, prefixed by its migration number,
   * drop (if present) and create the model in the app module, ensure the business code compiles against the latest model.
 
@@ -50,7 +50,7 @@ Things to be done soon:
 * add some prefix to each class generated in the migrator versioned models 
   * to make it clearer which version is using a migration
   * [issue #4](https://github.com/cluelessjoe/jooq-flyway-typesafe-migration/issues/4)
-* run LatestModelGenerator automatically [issue #3](https://github.com/cluelessjoe/jooq-flyway-typesafe-migration/issues/3)
+* run ModelGenerator automatically [issue #3](https://github.com/cluelessjoe/jooq-flyway-typesafe-migration/issues/3)
 
 Things to improve:
 * add some testing

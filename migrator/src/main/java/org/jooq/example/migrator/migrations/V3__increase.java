@@ -12,7 +12,6 @@ public class V3__increase extends JooqMigration {
 
     @Override
     public void migrate(Connection connection, DSLContext create) {
-
       create.alterTable(v1_AUTHOR)
                 .alterColumn(v1_AUTHOR.v1_FIRST_NAME)
                 .set(SQLDataType.VARCHAR.length(100))

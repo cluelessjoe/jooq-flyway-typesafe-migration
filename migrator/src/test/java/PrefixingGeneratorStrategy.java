@@ -15,7 +15,7 @@ public class PrefixingGeneratorStrategy extends DefaultGeneratorStrategy {
     }
 
     private String getVersion(Definition definition) {
-        return ((AbstractDatabase) definition.getDatabase()).getProperties().getProperty(LatestModelGenerator.VERSION_PROPERTY_KEY);
+        return ((AbstractDatabase) definition.getDatabase()).getProperties().getProperty(ModelSynchronizer.VERSION_PROPERTY_KEY);
     }
 
 }

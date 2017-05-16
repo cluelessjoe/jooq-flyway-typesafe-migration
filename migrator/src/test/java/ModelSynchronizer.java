@@ -1,4 +1,7 @@
+import org.flywaydb.core.api.MigrationInfo;
+import org.flywaydb.core.api.callback.BaseFlywayCallback;
 import org.jooq.example.common.DbInfo;
+import org.jooq.example.migrator.JooqMigration;
 import org.jooq.example.migrator.Migrator;
 import org.jooq.util.GenerationTool;
 import org.jooq.util.jaxb.*;
@@ -10,11 +13,13 @@ import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.sql.Connection;
 import java.util.Optional;
 
-public class LatestModelGenerator {
+class ModelSynchronizer extends BaseFlywayCallback {
 
     public static final String VERSION_PROPERTY_KEY = "VERSION";
+
     private final DbInfo dbInfo;
     private final File projectRoot;
     private final String migratorModuleName;
@@ -26,7 +31,7 @@ public class LatestModelGenerator {
     private final String generatedSourceDir;
     private final Path appGeneratedSourcesPackageDir;
 
-    public LatestModelGenerator(DbInfo dbInfo) {
+    public ModelSynchronizer(DbInfo dbInfo) {
         this.dbInfo = dbInfo;
         projectRoot = determineProjectRoot();
         generatedSourceDir = "src/main/generated-sources/";
@@ -39,23 +44,32 @@ public class LatestModelGenerator {
         appGeneratedSourcesPackageDir = Paths.get(projectRoot.getAbsolutePath(), appModuleName, generatedSourceDir + toDir(appModelPackage));
     }
 
-    public static void main(String[] args) throws Exception {
-        new LatestModelGenerator(new DbInfo("jdbc:h2:~/h2testDb", "sa", "")).generateNextModel();
+    @Override
+    public void afterEachMigrate(Connection connection, MigrationInfo info) {
+        super.afterEachMigrate(connection, info);
+        String currentVersion = info.getVersion().getVersion();
+        if (JooqMigration.didExecute) {
+            String migratorGeneratedModelPackage = migratorModelPackage + ".v" + currentVersion;
+            Path migratorGeneratedSourcesPackage = computeMigratorGeneratedSourcePackageDir(migratorGeneratedModelPackage);
+            if (JooqMigration.ddlInstructionExecuted) {
+                System.out.println("Generating migration model for version " + currentVersion + " in " + migratorGeneratedSourcesDir);
+                deleteRecursivelyIfExisting(migratorGeneratedSourcesPackage);
+                generate(createConfiguration(migratorGeneratedSourcesDir, migratorGeneratedModelPackage, Optional.of(currentVersion)));
+            } else {
+                System.out.println("No migration model for version " + currentVersion + " in " + migratorGeneratedSourcesDir);
+                deleteRecursivelyIfExisting(migratorGeneratedSourcesPackage);
+            }
+        }
     }
 
-    private void generateNextModel() {
-        String currentVersion = new Migrator(dbInfo).migrateAndReturnCurrentVersion();
-
-        String migratorGeneratedModelPackage = migratorModelPackage + ".v" + currentVersion;
-        Path migratorGeneratedSourcesPackage = computeMigratorGeneratedSourcePackageDir(migratorGeneratedModelPackage);
-
-        System.out.println("Generating migration model for version " + currentVersion + " in " + migratorGeneratedSourcesDir);
-        deleteRecursivelyIfExisting(migratorGeneratedSourcesPackage);
-        generate(createConfiguration(migratorGeneratedSourcesDir, migratorGeneratedModelPackage, Optional.of(currentVersion)));
-
-        System.out.println("Generating " + appModuleName + " module model for version " + currentVersion + " in " + appGeneratedSourcesDir);
-        deleteRecursivelyIfExisting(appGeneratedSourcesPackageDir);
-        generate(createConfiguration(appGeneratedSourcesDir, appModelPackage));
+    @Override
+    public void afterMigrate(Connection connection) {
+        super.afterMigrate(connection);
+        if (JooqMigration.didExecute) {
+            System.out.println("Generating " + appModuleName + " module model in " + appGeneratedSourcesDir);
+            deleteRecursivelyIfExisting(appGeneratedSourcesPackageDir);
+            generate(createConfiguration(appGeneratedSourcesDir, appModelPackage));
+        }
     }
 
     private Path computeMigratorGeneratedSourcePackageDir(String migratorGeneratedModelPackage) {
@@ -124,7 +138,6 @@ public class LatestModelGenerator {
 
     private void deleteRecursivelyIfExisting(Path p) {
         if (Files.exists(p)) {
-            System.out.println("Deleting recursively content in " + p.normalize().toFile().getAbsolutePath());
             deleteRecursively(p);
         }
     }
@@ -143,5 +156,4 @@ public class LatestModelGenerator {
     private String toDir(String packageName) {
         return packageName.replace(".", "/");
     }
-
 }

@@ -17,7 +17,7 @@ public class Runner {
     }
 
     public void start() {
-        new Migrator(dbInfo).migrateAndReturnCurrentVersion();
+        new Migrator(dbInfo, callbacks).migrate();
         int nbOfResults = 10;
         System.out.println("The first " + nbOfResults + " titles are:");
         new BookLookup(dbInfo).getBooksNames(0, nbOfResults).forEach(System.out::println);
